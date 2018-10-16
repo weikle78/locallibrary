@@ -96,20 +96,56 @@ exports.bookinstance_create_post = [
 ];
 
 // Display BookInstance delete form on GET.
-exports.bookinstance_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance delete GET');
-};
+exports.bookinstance_delete_get = function(req, res, next) {
 
+    BookInstance.findById(req.params.id)
+    .populate('book')
+    .exec(function (err, bookinstance) {
+        if (err) { return next(err); }
+        if (bookinstance==null) { // No results.
+            res.redirect('/catalog/bookinstances');
+        }
+        // Successful, so render.
+        res.render('bookinstance_delete', { title: 'Delete BookInstance', bookinstance:  bookinstance});
+    })
+
+};
 // Handle BookInstance delete on POST.
-exports.bookinstance_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance delete POST');
+exports.bookinstance_delete_post = function(req, res, next) {
+    
+    // Assume valid BookInstance id in field.
+    BookInstance.findByIdAndRemove(req.body.id, function deleteBookInstance(err) {
+        if (err) { return next(err); }
+        // Success, so redirect to list of BookInstance items.
+        res.redirect('/catalog/bookinstances');
+        });
+
 };
 
 // Display BookInstance update form on GET.
-exports.bookinstance_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance update GET');
-};
+exports.bookinstance_update_get = function(req, res, next) {
 
+    // Get book, authors and genres for form.
+    async.parallel({
+        bookinstance: function(callback) {
+            BookInstance.findById(req.params.id).populate('book').exec(callback)
+        },
+        books: function(callback) {
+            Book.find(callback)
+        },
+
+        }, function(err, results) {
+            if (err) { return next(err); }
+            if (results.bookinstance==null) { // No results.
+                var err = new Error('Book copy not found');
+                err.status = 404;
+                return next(err);
+            }
+            // Success.
+            res.render('bookinstance_form', { title: 'Update  BookInstance', book_list : results.books, selected_book : results.bookinstance.book._id, bookinstance:results.bookinstance });
+        });
+
+};
 // Handle bookinstance update on POST.
 exports.bookinstance_update_post = function(req, res) {
     res.send('NOT IMPLEMENTED: BookInstance update POST');
