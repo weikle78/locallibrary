@@ -1,3 +1,4 @@
+var debug = require('debug')('genre');
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
 var Genre = require('../models/genre');

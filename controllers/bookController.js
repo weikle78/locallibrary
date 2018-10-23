@@ -1,3 +1,4 @@
+var debug = require('debug')('book');
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
 var Book = require('../models/book');

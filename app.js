@@ -1,3 +1,6 @@
+var catalogRouter = require('./routes/catalog'); //Import routes for "catalog" area of site
+var compression = require('compression');
+var helmet = require('helmet');
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -10,10 +13,11 @@ var catalogRouter = require('./routes/catalog');  //Import routes for "catalog" 
 
 var app = express();
 
+app.use(helmet());
 
 //Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = 'mongodb://locallibrary:locallibrary1@ds149682.mlab.com:49682/local_library_bcw';
+var mongoDB = process.env.MONGODB_URI || 'mongodb://locallibrary:locallibrary1@ds149682.mlab.com:49682/local_library_bcw';
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
@@ -27,6 +31,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression()); //Compress all routes
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
